@@ -23,6 +23,19 @@ public class MainClass {
     public static void main(String[] args) {
         parseCommandLine(args);
 
+        if (Objects.isNull(fileWithURLs)) {
+            System.out.println("File with URLs hasn't set.");
+            return;
+        }
+        if (!fileWithURLs.toFile().exists() || !fileWithURLs.toFile().isFile() ) {
+            System.out.println("The specified file doesn't exist.");
+            return;
+        }
+        if (fileWithURLs.toFile().length() == 0) {
+            System.out.println("The specified file is empty!");
+            return;
+        }
+
         List<URI> filesURLs = synchronizedList(obtainURIsList());
 
         DownloadManager manager = new DownloadManager(filesURLs, DOWNLOAD_DIRECTORY_PATH, numberOfThreads, bandwidth);
