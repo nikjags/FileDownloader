@@ -58,10 +58,10 @@ public class DownloadManager {
     }
 
     private void writeAboutDownloadStart() {
-        System.out.println("---------------------------");
-        System.out.println("Download has been started!");
-        System.out.println("Number of threads: " + numberOfThreads);
-        System.out.println("---------------------------");
+        System.out.println("-----------------------------");
+        System.out.println("- Download has been started!");
+        System.out.println("- Number of threads: " + numberOfThreads);
+        System.out.println("-----------------------------");
     }
 
     synchronized boolean isNextURIExists() {
