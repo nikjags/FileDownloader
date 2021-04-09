@@ -126,7 +126,9 @@ public class DownloadManager {
         if (numberOfThreads == 1) {
             bandwidthPerThread = overallBandwidth;
         } else {
-            bandwidthPerThread = overallBandwidth / numberOfThreads;
+            if (bandwidthPerThread != Integer.MAX_VALUE) {
+                bandwidthPerThread = overallBandwidth / numberOfThreads;
+            }
         }
     }
 }

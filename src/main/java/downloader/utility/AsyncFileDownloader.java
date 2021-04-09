@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.RateLimiter;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.file.*;
 import java.time.Duration;
@@ -140,9 +139,11 @@ class AsyncFileDownloader implements Runnable {
     }
 
     public void setNewBandwidth(int newBandwidth) {
-        bandwidth = newBandwidth;
-        setNewBufferSize();
-        rateLimiter.setRate(bandwidth);
+        if (newBandwidth != Integer.MAX_VALUE) {
+            bandwidth = newBandwidth;
+            setNewBufferSize();
+            rateLimiter.setRate(bandwidth);
+        }
     }
 
 
@@ -173,10 +174,6 @@ class AsyncFileDownloader implements Runnable {
 
     private void afterThreadRun() {
         masterManager.notifyOnThreadDestroy(threadNumber);
-    }
-
-    private int getCeilPowerOfTwo(int x) {
-        return x == 0 ? 1 : round((float) pow(2, 32.0 - numberOfLeadingZeros(x - 1)));
     }
 
     private String getFileIdentifier() {
