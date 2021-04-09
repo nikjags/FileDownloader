@@ -53,6 +53,15 @@ public class DownloadManager {
         for (int i = 0; i < Math.min(numberOfThreads, listSize); i++) {
             newDownloadThread(urlList.remove(0));
         }
+
+        writeAboutDownloadStart();
+    }
+
+    private void writeAboutDownloadStart() {
+        System.out.println("---------------------------");
+        System.out.println("Download has been started!");
+        System.out.println("Number of threads: " + numberOfThreads);
+        System.out.println("---------------------------");
     }
 
     synchronized boolean isNextURIExists() {
