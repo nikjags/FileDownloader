@@ -18,7 +18,7 @@ public class MainClass {
 
     private static final List<String> ARG_LIST = List.of("f", "b", "t");
 
-    private static final Path DOWNLOAD_DIRECTORY_PATH = Paths.get("/download");
+    private static final Path DOWNLOAD_DIRECTORY_PATH = Paths.get("./download");
 
     public static void main(String[] args) {
         parseCommandLine(args);
