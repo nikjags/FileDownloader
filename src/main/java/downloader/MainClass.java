@@ -13,8 +13,8 @@ import static java.util.Collections.synchronizedList;
 
 public class MainClass {
     private static Path fileWithURLs;
-    private static int bandwidth = 1024 * 1024;
-    private static int numberOfThreads = 2;
+    private static int bandwidth = Integer.MAX_VALUE;
+    private static int numberOfThreads = 1;
 
     private static final List<String> ARG_LIST = List.of("f", "b", "t");
 
