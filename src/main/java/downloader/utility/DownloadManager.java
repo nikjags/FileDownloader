@@ -12,11 +12,10 @@ import java.util.Map;
 import static java.nio.file.Files.exists;
 
 public class DownloadManager {
-    private Path downloadDirectoryPath = Paths.get("./downloads");
-
-    private int maxThreadNumber = -1;
     private final List<URI> urlList;
 
+    private Path downloadDirectoryPath = Paths.get("./downloads");
+    private int maxThreadNumber = -1;
     private Map<Integer, AsyncFileDownloader> downloaderMap = new HashMap<>();
 
     private int numberOfThreads = 1;
@@ -57,13 +56,6 @@ public class DownloadManager {
         writeAboutDownloadStart();
     }
 
-    private void writeAboutDownloadStart() {
-        System.out.println("-----------------------------");
-        System.out.println("- Download has been started!");
-        System.out.println("- Number of threads: " + numberOfThreads);
-        System.out.println("-----------------------------");
-    }
-
     synchronized boolean isNextURIExists() {
         return !urlList.isEmpty();
     }
@@ -71,7 +63,6 @@ public class DownloadManager {
     synchronized URI getNextURI() {
         return isNextURIExists() ? urlList.remove(0) : null;
     }
-
 
     synchronized void notifyOnThreadDestroy(int threadNumber) {
         if (numberOfThreads > 1) {
@@ -89,10 +80,16 @@ public class DownloadManager {
         return bandwidthPerThread;
     }
 
-
-    /////////////////////////////////////////
+    /////////////////////////////////////////////
     /// Impl
-    /////////////////////////////////////////
+    /////////////////////////////////////////////
+
+    private void writeAboutDownloadStart() {
+        System.out.println("-----------------------------");
+        System.out.println("- Download has been started!");
+        System.out.println("- Number of threads: " + numberOfThreads);
+        System.out.println("-----------------------------");
+    }
 
     private void notifyThreads() {
         for (AsyncFileDownloader downloader :

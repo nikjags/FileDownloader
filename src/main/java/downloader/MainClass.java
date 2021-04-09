@@ -2,23 +2,23 @@ package downloader;
 
 import downloader.utility.DownloadManager;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.lang.Math.min;
 import static java.util.Collections.synchronizedList;
 
 public class MainClass {
+    private static final List<String> ARG_LIST = List.of("f", "b", "t");
+    private static final Path DOWNLOAD_DIRECTORY_PATH = Paths.get("./download");
     private static Path fileWithURLs;
     private static int bandwidth = Integer.MAX_VALUE;
     private static int numberOfThreads = 1;
-
-    private static final List<String> ARG_LIST = List.of("f", "b", "t");
-
-    private static final Path DOWNLOAD_DIRECTORY_PATH = Paths.get("./download");
 
     public static void main(String[] args) {
         parseCommandLine(args);
@@ -27,7 +27,7 @@ public class MainClass {
             System.out.println("File with URLs hasn't set.");
             return;
         }
-        if (!fileWithURLs.toFile().exists() || !fileWithURLs.toFile().isFile() ) {
+        if (!fileWithURLs.toFile().exists() || !fileWithURLs.toFile().isFile()) {
             System.out.println("The specified file doesn't exist.");
             return;
         }
@@ -82,12 +82,12 @@ public class MainClass {
     }
 
     private static List<URI> obtainURIsList() {
-        List<URI> FilesURLs = new ArrayList<>();
+        List<URI> filesURLs = new ArrayList<>();
         try (FileReader fileReader = new FileReader(fileWithURLs.toFile());
              BufferedReader bufferedReader = new BufferedReader(fileReader)) {
             String str;
             while ((str = bufferedReader.readLine()) != null) {
-                FilesURLs.add(URI.create(str));
+                filesURLs.add(URI.create(str));
             }
         } catch (FileNotFoundException e) {
             System.out.println("Не найден файл \"" + fileWithURLs + "\"");
@@ -97,7 +97,6 @@ public class MainClass {
             ioException.printStackTrace();
         }
 
-        return FilesURLs;
+        return filesURLs;
     }
-
 }
