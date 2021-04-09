@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.file.*;
 import java.time.Duration;
@@ -74,6 +75,7 @@ class AsyncFileDownloader implements Runnable {
         while (!Objects.isNull(fileURI)) {
             try {
                 HttpsURLConnection connection = (HttpsURLConnection) fileURI.toURL().openConnection();
+                connection.setConnectTimeout(10_000);
                 InputStream inputStream = connection.getInputStream();
 
                 downloadFile(inputStream);
