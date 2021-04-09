@@ -15,10 +15,8 @@ import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.*;
 
 class AsyncFileDownloader implements Runnable {
-    /** max size of bufferOutputStream.
-     *
-     */
-    private static final int MAX_BUFFER_SIZE = 1_024;
+    private static final int MAX_BUFFER_SIZE = 1_048_576;
+    private static final int DEFAULT_BANDWIDTH = Integer.MAX_VALUE;
 
     private URI fileURI;
 
@@ -26,7 +24,7 @@ class AsyncFileDownloader implements Runnable {
 
     private int threadNumber;
 
-    private int bandwidth = Integer.MAX_VALUE;
+    private int bandwidth = DEFAULT_BANDWIDTH;
 
     private RateLimiter rateLimiter;
 
@@ -82,7 +80,7 @@ class AsyncFileDownloader implements Runnable {
 
                 connection.disconnect();
             } catch (IOException ioException) {
-                System.out.println("Ошибка при установлении соединения.");
+                System.out.println("An error occurred while establishing a connection.");
                 ioException.printStackTrace();
             }
 
@@ -98,8 +96,7 @@ class AsyncFileDownloader implements Runnable {
 
         Path tempFilePath = downloadDirectoryPath.resolve("temp" + threadNumber);
         try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-            new FileOutputStream(tempFilePath.toString()),
-            min(getCeilPowerOfTwo(bandwidth) * 2, MAX_BUFFER_SIZE))) {
+            new FileOutputStream(tempFilePath.toString()))) {
 
             LocalTime start = LocalTime.now();
             while (true) {
@@ -122,7 +119,7 @@ class AsyncFileDownloader implements Runnable {
 
             printDownloadStatistics(start, end, totalDownloaded, getFileIdentifier());
         } catch (IOException ioException) {
-            System.out.println("Произошла ошибка при создании файла.");
+            System.out.println("An error occurred while creating a file.");
             ioException.printStackTrace();
         }
 
@@ -135,7 +132,7 @@ class AsyncFileDownloader implements Runnable {
 
             Files.move(tempFilePath, tempFilePath.resolveSibling(getFileIdentifier()));
         } catch (IOException ioException) {
-            System.out.println("Произошла ошибка при удалении существующего файла.");
+            System.out.println("An error occurred while deleting a temporary file.");
             ioException.printStackTrace();
         }
     }

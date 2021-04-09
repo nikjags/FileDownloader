@@ -45,7 +45,7 @@ public class DownloadManager {
             try {
                 Files.createDirectory(downloadDirectoryPath);
             } catch (IOException ioException) {
-                System.out.println("Ошибка при создании директории.");
+                System.out.println("Error while creating a download directory.");
                 ioException.printStackTrace();
             }
         }
