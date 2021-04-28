@@ -19,7 +19,7 @@ import java.util.Objects;
 class AsyncFileDownloader implements Runnable {
     public static final int MAX_TRIES = 3;
     public static final int SLEEP_TIME_MS = 5_000;
-    private static final int MAX_BUFFER_SIZE = 1_048_576;
+    private static final int MAX_BUFFER_SIZE = 16_383; // it's equal to the socket stream buffer capacity
     private static final int DEFAULT_BANDWIDTH = Integer.MAX_VALUE;
 
     private URI fileURI;
@@ -29,7 +29,6 @@ class AsyncFileDownloader implements Runnable {
 
     private RateLimiter rateLimiter;
     private HttpsURLConnection connection;
-    private int bufferSize;
     private DownloadManager masterManager;
     private int numberOfTry = 0;
 
@@ -56,8 +55,6 @@ class AsyncFileDownloader implements Runnable {
 
         public AsyncFileDownloader build(DownloadManager masterManager) {
             rateLimiter = RateLimiter.create(bandwidth);
-
-            setNewBufferSize();
 
             AsyncFileDownloader.this.masterManager = masterManager;
 
@@ -101,7 +98,6 @@ class AsyncFileDownloader implements Runnable {
     public void setNewBandwidth(int newBandwidth) {
         if (newBandwidth != Integer.MAX_VALUE) {
             bandwidth = newBandwidth;
-            setNewBufferSize();
             rateLimiter.setRate(bandwidth);
         }
     }
@@ -117,7 +113,9 @@ class AsyncFileDownloader implements Runnable {
     /////////////////////////////////////////////
 
     private void downloadFile(InputStream inputStream) {
-        int bytesReadNow = bandwidth; //initialize it for proper throttle in cases when size of the file is around bandwidth limit
+        int bytesReadNow = bandwidth;        // initialize and acquire some permits for proper throttle
+        rateLimiter.acquire(bytesReadNow);   // in cases when size of the file is around bandwidth limit
+
         long totalDownloaded = 0;
 
         Path tempFilePath = downloadDirectoryPath.resolve("temp" + threadNumber);
@@ -126,15 +124,15 @@ class AsyncFileDownloader implements Runnable {
 
             LocalTime start = LocalTime.now();
             while (true) {
-                byte[] arr = new byte[bufferSize];
-
-                rateLimiter.acquire(bytesReadNow);
+                byte[] arr = new byte[MAX_BUFFER_SIZE];
 
                 bytesReadNow = inputStream.read(arr);
 
                 if (bytesReadNow == -1) {
                     break;
                 }
+
+                rateLimiter.acquire(bytesReadNow);
 
                 bufferedOutputStream.write(arr, 0, bytesReadNow);
                 totalDownloaded += bytesReadNow;
@@ -178,10 +176,6 @@ class AsyncFileDownloader implements Runnable {
 
     private double calculateAverageSpeed(long size, Duration duration) {
         return size / (((double) duration.getNano() / 1_000_000_000) + duration.getSeconds());
-    }
-
-    private void setNewBufferSize() {
-        bufferSize = Math.min(bandwidth, MAX_BUFFER_SIZE);
     }
 
     private void sleep() {
