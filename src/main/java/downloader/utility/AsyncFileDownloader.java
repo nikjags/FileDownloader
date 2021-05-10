@@ -3,10 +3,7 @@ package downloader.utility;
 import com.google.common.util.concurrent.RateLimiter;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,6 +18,7 @@ class AsyncFileDownloader implements Runnable {
     public static final int SLEEP_TIME_MS = 5_000;
     private static final int MAX_BUFFER_SIZE = 16_383; // it's equal to the socket stream buffer capacity
     private static final int DEFAULT_BANDWIDTH = Integer.MAX_VALUE;
+    public static final int NOT_FOUNT_CODE = 404;
 
     private URI fileURI;
     private Path downloadDirectoryPath;
@@ -75,17 +73,21 @@ class AsyncFileDownloader implements Runnable {
             try {
                 InputStream inputStream = establishConnection();
 
+                System.out.println("Thread " + threadNumber + ": starting to download a " + fileURI.toString());
                 downloadFile(inputStream);
 
                 connection.disconnect();
-            } catch (IOException ioException) {
-                System.out.println("Thread" + threadNumber + ": an error occurred while establishing a connection with " + fileURI.toString());
+            } catch (FileNotFoundException notFoundException) {
+                System.out.println("Thread " + threadNumber + ": file " + fileURI.toString() + " not found and skipped.");
+            }
+            catch (IOException ioException) {
+                System.out.println("Thread " + threadNumber + ": an error occurred while establishing a connection with " + fileURI.toString());
                 if (numberOfTry < MAX_TRIES) {
-                    System.out.println("Thread" + threadNumber + ": trying to reestablish a connection... " + ++numberOfTry);
+                    System.out.println("Thread " + threadNumber + ": trying to reestablish a connection... " + ++numberOfTry);
                     sleep();
                     continue;
                 } else {
-                    System.out.println("Thread" + threadNumber + ": failed to reestablish a connection; file " + fileURI.toString() + " is skipped");
+                    System.out.println("Thread " + threadNumber + ": failed to reestablish a connection; file " + fileURI.toString() + " is skipped.");
                 }
             }
 
