@@ -14,11 +14,11 @@ import java.util.Locale;
 import java.util.Objects;
 
 class AsyncFileDownloader implements Runnable {
-    public static final int MAX_TRIES = 3;
+    private static final int MAX_TRIES = 3;
     public static final int SLEEP_TIME_MS = 5_000;
     private static final int MAX_BUFFER_SIZE = 16_383; // it's equal to the socket stream buffer capacity
     private static final int DEFAULT_BANDWIDTH = Integer.MAX_VALUE;
-    public static final int NOT_FOUNT_CODE = 404;
+    private static final int NOT_FOUND_CODE = 404;
 
     private URI fileURI;
     private Path downloadDirectoryPath;
@@ -106,6 +106,9 @@ class AsyncFileDownloader implements Runnable {
 
     private InputStream establishConnection() throws IOException {
         connection = (HttpsURLConnection) fileURI.toURL().openConnection();
+        if (connection.getResponseCode() == NOT_FOUND_CODE) {
+            throw new FileNotFoundException();
+        }
         connection.setConnectTimeout(10_000);
         return connection.getInputStream();
     }
